@@ -48,8 +48,28 @@ df_filtrado2 |>  ggplot(aes(x = Pos_simple, y = AST, fill = Pos_simple)) +
 ```
 
 ## 3. Comparación de edades prueba cambio 
+En esta parte del analisis exploratorio, nos centramos en la parte de comparar edades con PER que es una estadistica que puntua la productividad de un jugador de basquetbol tomando en cuenta minutos jugados, intensidad de juego, acciones positivas y negativas. Es interesante ver en que edades se alcanzan los picos o los menores rendimientos.
+```{r}
+curva_edad <- df_filtrado %>% group_by(Age) %>% filter(n() >= 30) %>%
+  summarise(PER_prom = mean(PER, na.rm = TRUE))
 
+ggplot(curva_edad, aes(x = Age, y = PER_prom)) +
+  geom_line(color = "darkorange") + geom_point() +
+  labs(title = "Rendimiento (PER) según edad", x = "Edad", y = "PER promedio") +
+  theme_minimal()
+```
 
+## 4. Eficiencia vs Volumen de tiros.
+En este "geom_point" se grafica el porcentaje de aciertos de cada jugador en relacion a la cantidad de tiros que realizan por temporada, uno pensaria que cuanto mas tiran, menos eficaces son los jugadores, pero es exactamente al reves, la relacion nos muestra que cuanto mas tiros se realizan mayor es el porcentaje de acierto.
 
+```{r}
+df_filtrado <- df_filtrado %>% mutate(PTS_pg = PTS / G)
 
-## 4. aca va la paerte 4 
+ggplot(df_filtrado, aes(x = PTS_pg, y = TS.)) +
+  geom_point(alpha = 0.2, color = "steelblue") +
+  geom_smooth(method = "lm", color = "firebrick") +
+  labs(title = "Volumen de anotación vs eficiencia de tiro",
+       x = "Puntos por partido", y = "TS% (verdadero % de tiro)") +
+  theme_minimal()
+```
+
