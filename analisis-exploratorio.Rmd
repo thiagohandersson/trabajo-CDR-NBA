@@ -47,4 +47,4 @@ df_filtrado2 |>  ggplot(aes(x = Pos_simple, y = AST, fill = Pos_simple)) +
   theme_minimal()
 ```
 
-## 3. Comparación de edades prueba cambio 123 que tanto tengo que escribir para ppoder cambiar algo
+## 3. Comparación de edades prueba cambio holholhaohll
