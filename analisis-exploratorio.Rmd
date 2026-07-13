@@ -34,7 +34,7 @@ evolucion_triple |> ggplot(aes(x = Year, y = prom_3PA)) +
   theme_minimal()
 ```
 
-## 2. Pronedio de Asistencias por temporada
+## 2. Cantidad de Asistencias por temporada
 
 En este boxplot visualizamos los cuartiles de asistencias por temporada y por posición. En este caso varios jugadores tenían varias posiciones y le pedimos ayuda a la IA para crear un nuevo df el cual contenga solo las 5 pociones clásicas del deporte, PG (point guard) = Base, SG (shooting guard) = Escolta, SF (small forward) = Alero, PF (power forward), C (center) = Pivot. Ocurre algo muy esperable y es que los bases promedian 4 veces más asistencias que el resto de las posiciones.
 
@@ -47,4 +47,4 @@ df_filtrado2 |>  ggplot(aes(x = Pos_simple, y = AST, fill = Pos_simple)) +
   theme_minimal()
 ```
 
-## 3. Comparación de edades
+## 3. Comparación de edades prueba cambio 123 que tanto tengo que escribir para ppoder cambiar algo
