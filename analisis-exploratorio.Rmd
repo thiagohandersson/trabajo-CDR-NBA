@@ -1,0 +1,50 @@
+---
+title: "analisis exploratorio"
+output: html_document
+date: "2026-07-13"
+---
+
+
+# Analisis Exploratorio 
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+df <- read_csv("nba_stats.csv")
+```
+
+
+## 1. Evolución del triple
+
+En esta sección nos interesó estudiar como ha evolucionado el triple a lo largo de los años. Nosotros creíamos de antemano que los triples intentaodos por partido de cada jugador iban a aumentar, lo cual a la hora de mirar el gráfico resultó ser cierto.
+Buscando iun poco mas de información descubrimos que la línea del tiro de 3, tuvo una modificación (de 7,24 metros toda la línea a llegar a ser 6,70 metros) la cual afectó considerrablemente los intentos del tiro (se puede ver facilmente en el gráfico como repercutió el cambio en los intentos) . Ademas, a lo largo de los años manera de jugar ha cambiado, el tiro de tres toma un rol mucho mas importante. Lo cual puede verse en el gráfico en el 2014 en adelante.
+
+```{r}
+df_filtrado1 <- df %>% filter(MP >= 500) %>% mutate(X3PA_pg = X3PA / G)
+
+evolucion_triple <- df_filtrado1 %>%
+  group_by(Year) %>%
+  summarise(prom_3PA = mean(X3PA_pg))
+
+evolucion_triple |> ggplot(aes(x = Year, y = prom_3PA)) +
+  geom_line(color = "steelblue", linewidth = 1) +
+  labs(title = "Evolución de intentos de triple por partido",
+       x = "Año", y = "Triples intentados por partido (prom. liga)") +
+  theme_minimal()
+```
+
+## 2. Pronedio de Asistencias por temporada
+
+En este boxplot visualizamos los cuartiles de asistencias por temporada y por posición. En este caso varios jugadores tenían varias posiciones y le pedimos ayuda a la IA para crear un nuevo df el cual contenga solo las 5 pociones clásicas del deporte, PG (point guard) = Base, SG (shooting guard) = Escolta, SF (small forward) = Alero, PF (power forward), C (center) = Pivot. Ocurre algo muy esperable y es que los bases promedian 4 veces más asistencias que el resto de las posiciones.
+
+```{r}
+df_filtrado2 <- df_filtrado1 %>% mutate(Pos_simple = str_split(Pos, "-", simplify = TRUE)[,1])
+
+df_filtrado2 |>  ggplot(aes(x = Pos_simple, y = AST, fill = Pos_simple)) +
+  geom_boxplot() +
+  labs(title = "Distribución de asistencias por posición", x = "Posición", y = "Asistencias") +
+  theme_minimal()
+```
+
+## 3. Comparación de edades
