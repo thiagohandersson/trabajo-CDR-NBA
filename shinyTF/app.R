@@ -2,9 +2,165 @@
 library(shiny)
 library(ggplot2)
 library(dplyr)
-install.packages()
+library(DT)
+
+df <- read.csv("nba_stats.csv")
+
+df_filtrado <- df |> 
+  filter(MP >= 500) |>                                     
+    Pos_simple = sapply(strsplit(Pos, "-"), function(x) x[1],  # Pasamos los jugadores que tienen varias posiciones a solo 1
+    PTS_pp = PTS / G,
+    AST_pp = AST / G,
+    TRB_pp = TRB / G,
+    STL_pp = STL / G,
+    BLK_pp = BLK / G,
+    X3PA_pp = X3PA / G)
+
+variables_disponibles <- c("Puntos por partido"      = "PTS_pg",
+                           "Asistencias por partido" = "AST_pg",
+                           "Rebotes por partido"     = "TRB_pg",
+                           "Robos por partido"       = "STL_pg",
+                           "Bloqueos por partido"    = "BLK_pg",
+                           "Triples intentados/partido" = "X3PA_pg",
+                           "Eficiencia de tiro (TS%)"   = "TS.",
+                           "PER"                     = "PER",
+                           "Win Shares(WS)"= "WS")
+
+jugadores <- sort(unique(df_filtrado$Player))
+lista_posiciones <- sort(unique(df_filtrado$Pos_simple))
 
 
 ui <- fluidPage(
+  titlePanel("Datos NBA (1990-2017)"),
+  tabsetPanel(
+    tabPanel(
+      "Evolución de la NBA", #primer pestaña
+      sidebarLayout(
+        sidebarPanel(
+          selectInput("var_evolucion", "Variable a graficar:",
+                      choices = variables_disponibles),
+          sliderInput("rango_anios", "Rango de años:",
+                      min = min(df_filtrado$Year), max = max(df_filtrado$Year),
+                      value = c(min(df_filtrado$Year), max(df_filtrado$Year)),
+                      sep = "")
+        ),
+        mainPanel(
+          plotOutput("grafico_evolucion")
+        )
+      )
+    ),
+    tabPanel(
+      "Comparar por posición", #segunda pestaña
+      sidebarLayout(
+        sidebarPanel(
+          selectInput("var_posicion", "Variable a comparar:",
+                      choices = variables_disponibles),
+          checkboxGroupInput("posiciones_elegidas", "Posiciones:",
+                             choices = lista_posiciones,
+                             selected = lista_posiciones)
+        ),
+        mainPanel(
+          plotOutput("grafico_posicion")
+        )
+      )
+    ),
+    tabPanel("Comparar jugadores", #3er pestaña
+             sidebarLayout(
+               sidebarPanel(
+                 selectizeInput("jugador1", "Jugador 1:", choices = jugadores,
+                                selected = jugadores[1],
+                                options = list(maxOptions = length(jugadores))),
+                 selectizeInput("jugador2", "Jugador 2:", choices = jugadores,
+                                selected = jugadores[2],
+                                options = list(maxOptions = length(jugadores)))
+               ),
+               mainPanel(
+                 plotOutput("grafico_comparacion"),
+                 br(),
+                 DTOutput("tabla_comparacion")
+               )
+             )
+    )
+  )
+)
+
+server <- function(input, output) {
+  
+  #Reactive de la pestaña 1
+  datos_evolucion <- reactive({
+    df_filtrado |> 
+      filter(Year >= input$rango_anios[1], Year <= input$rango_anios[2]) |> 
+      group_by(Year) |> 
+      summarise(promedio = mean(.data[[input$var_evolucion]], na.rm = TRUE))
+  })
+  
+  output$grafico_evolucion <- renderPlot({
+    ggplot(datos_evolucion(), aes(x = Year, y = promedio)) +
+      geom_line(color = "steelblue", linewidth = 1) +
+      geom_point(color = "steelblue") +
+      labs(x = "Año", y = names(variables_disponibles)[variables_disponibles == input$var_evolucion],
+           title = "Evolución del promedio de la liga") +
+      theme_minimal()
+  })
+  #reactive pestaña2
+  datos_posicion <- reactive({
+    req(input$posiciones_elegidas) # frena si destildaron todo
+    df_filtrado |>  filter(Pos_simple %in% input$posiciones_elegidas)
+  })
+  
+  output$grafico_posicion <- renderPlot({
+    ggplot(datos_posicion(), aes(x = Pos_simple, y = .data[[input$var_posicion]], fill = Pos_simple)) +
+      geom_boxplot() +
+      labs(x = "Posición", y = names(variables_disponibles)[variables_disponibles == input$var_posicion],
+           title = "Distribución por posición") +
+      theme_minimal() +
+      theme(legend.position = "none")
+  })
+  
+  #reactive pestaña3
+  comparacion_jugadores <- reactive({
+    req(input$jugador1, input$jugador2)
+    
+    df_filtrado |> 
+      filter(Player %in% c(input$jugador1, input$jugador2)) %>%
+      group_by(Player)  |> 
+      summarise(
+        `Puntos/partido`      = round(mean(PTS_pg), 1),
+        `Asistencias/partido` = round(mean(AST_pg), 1),
+        `Rebotes/partido`     = round(mean(TRB_pg), 1),
+        `Robos/partido`       = round(mean(STL_pg), 1),
+        `Bloqueos/partido`    = round(mean(BLK_pg), 1),
+        `TS%`                 = round(mean(TS), 3),
+        `Temporadas en la base` = n()
+      )
+  })
+  
+  output$grafico_comparacion <- renderPlot({
+    datos_largos <- comparacion_jugadores() |> 
+      select(Player, `Puntos/partido`, `Asistencias/partido`, `Rebotes/partido`,
+             `Robos/partido`, `Bloqueos/partido`) |> 
+      tidyr::pivot_longer(cols = -Player, names_to = "estadistica", values_to = "valor")
+    
+    ggplot(datos_largos, aes(x = estadistica, y = valor, fill = Player)) +
+      geom_col(position = "dodge") +
+      labs(x = NULL, y = "Promedio por partido", title = "Comparación de jugadores",
+           fill = "Jugador") +
+      theme_minimal()
+  })
+  
+  output$tabla_comparacion <- renderDT({
+    comparacion_jugadores()
+  })
+}
+shinyApp(ui, server)
+  
+  
+  
+  
+  
+  
+  
+  
+  
                                 
 
