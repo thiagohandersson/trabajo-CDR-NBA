@@ -21,11 +21,13 @@ En esta sección nos interesó estudiar como ha evolucionado el triple a lo larg
 Buscando iun poco mas de información descubrimos que la línea del tiro de 3, tuvo una modificación (de 7,24 metros toda la línea a llegar a ser 6,70 metros) la cual afectó considerrablemente los intentos del tiro (se puede ver facilmente en el gráfico como repercutió el cambio en los intentos) . Ademas, a lo largo de los años manera de jugar ha cambiado, el tiro de tres toma un rol mucho mas importante. Lo cual puede verse en el gráfico en el 2014 en adelante.
 
 ```{r}
-df_filtrado1 <- df %>% filter(MP >= 500) %>% mutate(X3PA_pg = X3PA / G)
+df_filtrado1 <- df |> 
+    filter(MP >= 500) |> 
+      mutate(X3PA_pg = X3PA / G)
 
-evolucion_triple <- df_filtrado1 %>%
-  group_by(Year) %>%
-  summarise(prom_3PA = mean(X3PA_pg))
+evolucion_triple <- df_filtrado1 |> 
+    group_by(Year) |> 
+      summarise(prom_3PA = mean(X3PA_pg))
 
 evolucion_triple |> ggplot(aes(x = Year, y = prom_3PA)) +
   geom_line(color = "steelblue", linewidth = 1) +
@@ -39,37 +41,44 @@ evolucion_triple |> ggplot(aes(x = Year, y = prom_3PA)) +
 En este boxplot visualizamos los cuartiles de asistencias por temporada y por posición. En este caso varios jugadores tenían varias posiciones y le pedimos ayuda a la IA para crear un nuevo df el cual contenga solo las 5 pociones clásicas del deporte, PG (point guard) = Base, SG (shooting guard) = Escolta, SF (small forward) = Alero, PF (power forward), C (center) = Pivot. Ocurre algo muy esperable y es que los bases promedian 4 veces más asistencias que el resto de las posiciones.
 
 ```{r}
-df_filtrado2 <- df_filtrado1 %>% mutate(Pos_simple = str_split(Pos, "-", simplify = TRUE)[,1])
+df_filtrado2 <- df_filtrado1 |> 
+    mutate(Pos_simple = str_split(Pos, "-", simplify = TRUE)[,1])
 
-df_filtrado2 |>  ggplot(aes(x = Pos_simple, y = AST, fill = Pos_simple)) +
-  geom_boxplot() +
-  labs(title = "Distribución de asistencias por posición", x = "Posición", y = "Asistencias") +
-  theme_minimal()
+df_filtrado2 |>  
+  ggplot(aes(x = Pos_simple, y = AST, fill = Pos_simple)) +
+    geom_boxplot() +
+      labs(title = "Distribución de asistencias por posición", x = "Posición", y = "Asistencias") +
+        theme_minimal()
 ```
 
 ## 3. Comparación de edades prueba cambio 
 En esta parte del analisis exploratorio, nos centramos en la parte de comparar edades con PER que es una estadistica que puntua la productividad de un jugador de basquetbol tomando en cuenta minutos jugados, intensidad de juego, acciones positivas y negativas. Es interesante ver en que edades se alcanzan los picos o los menores rendimientos.
 ```{r}
-curva_edad <- df_filtrado %>% group_by(Age) %>% filter(n() >= 30) %>%
-  summarise(PER_prom = mean(PER, na.rm = TRUE))
+curva_edad <- df_filtrado |>
+    group_by(Age) |> 
+      filter(n() >= 30) |> 
+        summarise(PER_prom = mean(PER, na.rm = TRUE))
 
-ggplot(curva_edad, aes(x = Age, y = PER_prom)) +
-  geom_line(color = "darkorange") + geom_point() +
-  labs(title = "Rendimiento (PER) según edad", x = "Edad", y = "PER promedio") +
-  theme_minimal()
+df_filtrado |> 
+  ggplot(curva_edad, aes(x = Age, y = PER_prom)) +
+    geom_line(color = "darkorange") + geom_point() +
+      labs(title = "Rendimiento (PER) según edad", x = "Edad", y = "PER promedio") +
+        theme_minimal()
 ```
 
 ## 4. Eficiencia vs Volumen de tiros.
 En este "geom_point" se grafica el porcentaje de aciertos de cada jugador en relacion a la cantidad de tiros que realizan por temporada, uno pensaria que cuanto mas tiran, menos eficaces son los jugadores, pero es exactamente al reves, la relacion nos muestra que cuanto mas tiros se realizan mayor es el porcentaje de acierto.
 
 ```{r}
-df_filtrado <- df_filtrado %>% mutate(PTS_pg = PTS / G)
+df_filtrado <- df_filtrado |> 
+            mutate(PTS_pg = PTS / G)
 
-ggplot(df_filtrado, aes(x = PTS_pg, y = TS.)) +
-  geom_point(alpha = 0.2, color = "steelblue") +
-  geom_smooth(method = "lm", color = "firebrick") +
-  labs(title = "Volumen de anotación vs eficiencia de tiro",
-       x = "Puntos por partido", y = "TS% (verdadero % de tiro)") +
+df_filtrado |> 
+  ggplot(aes(x = PTS_pg, y = TS.)) +
+    geom_point(alpha = 0.2, color = "steelblue") +
+      geom_smooth(method = "lm", color = "firebrick") +
+        labs(title = "Volumen de anotación vs eficiencia de tiro",
+          x = "Puntos por partido", y = "TS% (verdadero % de tiro)") +
   theme_minimal()
 ```
 
