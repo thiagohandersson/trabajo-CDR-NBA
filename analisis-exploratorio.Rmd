@@ -4,8 +4,14 @@ output: html_document
 date: "2026-07-13"
 ---
 
+#1.Introducción:
+En este trabajo buscamos visualizar y analizar datos de jugadores de la NBA desde 1970 hasta hasta 2017 y buscar que ha cambiado en el tiempo, asi como comparar jugadores dependiendo de sus caracteristicas etc. 
 
-# Analisis Exploratorio 
+#2.Datos:
+Los datos fueron extraidos de un dataset de kaggle. El dataset posee 15117 observaciones, ahi uno de los primeros pasos fue que el programa no tome como distintos jugadores al mismo, que jugo mas de una temporada. Para eso se utilizó un sort, ademas se calcularon por jugador los datos por partido (asistencia, puntos, etc) 
+
+
+#3.Analisis Exploratorio 
 
 ```{r}
 library(ggplot2)
@@ -54,23 +60,23 @@ df_filtrado2 |>
 ## 3. Comparación de edades prueba cambio 
 En esta parte del analisis exploratorio, nos centramos en la parte de comparar edades con PER que es una estadistica que puntua la productividad de un jugador de basquetbol tomando en cuenta minutos jugados, intensidad de juego, acciones positivas y negativas. Es interesante ver en que edades se alcanzan los picos o los menores rendimientos.
 ```{r}
-curva_edad <- df_filtrado |>
+curva_edad <- df_filtrado1 |>
     group_by(Age) |> 
       filter(n() >= 30) |> 
         summarise(PER_prom = mean(PER, na.rm = TRUE))
 
-df_filtrado |> 
-  ggplot(curva_edad, aes(x = Age, y = PER_prom)) +
+curva_edad |> 
+  ggplot(aes(x = Age, y = PER_prom)) +
     geom_line(color = "darkorange") + geom_point() +
       labs(title = "Rendimiento (PER) según edad", x = "Edad", y = "PER promedio") +
         theme_minimal()
 ```
 
 ## 4. Eficiencia vs Volumen de tiros.
-En este "geom_point" se grafica el porcentaje de aciertos de cada jugador en relacion a la cantidad de tiros que realizan por temporada, uno pensaria que cuanto mas tiran, menos eficaces son los jugadores, pero es exactamente al reves, la relacion nos muestra que cuanto mas tiros se realizan mayor es el porcentaje de acierto.
+En este "geom_point" se grafica el porcentaje de aciertos de cada jugador en relacion a la cantidad de tiros que realizan por temporada, uno pensaria que cuanto mas tiran, menos eficaces son los jugadores, pero es exactamente al reves, la relacion nos muestra que cuanto mas puntos por partido realizan, mayor es el porcentaje de acierto.
 
 ```{r}
-df_filtrado <- df_filtrado |> 
+df_filtrado <- df_filtrado1 |> 
             mutate(PTS_pg = PTS / G)
 
 df_filtrado |> 
