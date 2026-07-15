@@ -162,7 +162,7 @@ server <- function(input, output) {
   output$tabla_comparacion <- renderDT({
     comparacion_jugadores()
   }, options = list(dom = 't')) #para que no aparezcan cosas default que no nos interesaban de la tabla
-  # reactive pestaña4
+  # reactive pestaña 4
   
   metrica_top <- reactive({
     req(input$metricatop)
