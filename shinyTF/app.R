@@ -132,7 +132,7 @@ server <- function(input, output) {
   comparacion_jugadores <- reactive({
     req(input$jugador1, input$jugador2)
     
-    df_filtrado |> 
+    df_filtrado |> #medias de todas las metricas de los partidos
       filter(Player %in% c(input$jugador1, input$jugador2)) %>%
       group_by(Player)  |> 
       summarise(
@@ -146,13 +146,13 @@ server <- function(input, output) {
       )
   })
   
-  output$grafico_comparacion <- renderPlot({
+  output$grafico_comparacion <- renderPlot({ #separar para luego realizar la tabla y grafico de la metrica y su media
     datos_largos <- comparacion_jugadores() |> 
       select(Player, `Puntos/partido`, `Asistencias/partido`, `Rebotes/partido`,
              `Robos/partido`, `Bloqueos/partido`) |> 
-      tidyr::pivot_longer(cols = -Player, names_to = "estadistica", values_to = "valor")
+      tidyr::pivot_longer(cols = -Player, names_to = "metric", values_to = "mediametric")
     
-    ggplot(datos_largos, aes(x = estadistica, y = valor, fill = Player)) +
+    ggplot(datos_largos, aes(x = metric, y = mediametric, fill = Player)) +
       geom_col(position = "dodge") +
       labs(x = NULL, y = "Promedio por partido", title = "Comparación de jugadores",
            fill = "Jugador") +
@@ -161,7 +161,7 @@ server <- function(input, output) {
   
   output$tabla_comparacion <- renderDT({
     comparacion_jugadores()
-  }, options = list(dom = 't'))
+  }, options = list(dom = 't')) #para que no aparezcan cosas default que no nos interesaban de la tabla
   # reactive pestaña4
   
   metrica_top <- reactive({
