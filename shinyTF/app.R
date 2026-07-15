@@ -115,7 +115,7 @@ server <- function(input, output) {
   })
   #reactive pestaña2
   datos_posicion <- reactive({
-    req(input$posiciones_elegidas) # frena si destildaron todo
+    req(input$posiciones_elegidas)
     df_filtrado |>  filter(Pos_simple %in% input$posiciones_elegidas)
   })
   
