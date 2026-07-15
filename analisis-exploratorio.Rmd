@@ -1,24 +1,42 @@
 ---
-title: "analisis exploratorio"
+title: "Análisis exploratorio"
 output: html_document
 date: "2026-07-13"
+author: Thiago Handersson. Simón Ubiría
 ---
 
-#1.Introducción:
-En este trabajo final de curso presentamos una aplicación interactiva en Shiny en el cual buscamos visualizar y presentar  datos de jugadores de la NBA desde 1990 hasta 2017 y buscar que ha cambiado en el tiempo, asi como comparar jugadores dependiendo de sus caracteristicas. 
+# 1.Introducción:
 
-#2.Datos:
-Los datos fueron extraidos de un dataset de kaggle. El dataset posee 15117 observaciones, ahi uno de los primeros pasos fue que el programa no tome como distintos jugadores al mismo, que jugo mas de una temporada. Para eso se utilizó un sort, ademas se calcularon por jugador los datos por partido (asistencia, puntos, etc).
-Cabe aclarar que las posiciones con las que trabajaremos son las siguientes:
+  En este trabajo final de curso presentamos una aplicación interactiva en Shiny, el cual usamos para visualizar y presentar datos de jugadores de la NBA desde 1990 hasta 2017 y buscar que ha cambiado en el tiempo, asi como comparar jugadores dependiendo de sus características.
+
+# 2.Datos:
+
+  Los datos fueron extraidos de un dataset de Kaggle. El dataset posee 15117 observaciones, aqui uno de los primeros pasos fue que el programa no tome como distintos jugadores al mismo, que jugó más de una temporada. Para eso se utilizó un sort, ademas áe calcularon por jugador los datos por partido (asistencia, puntos, etc).
+
+  Cabe aclarar que las posiciones con las que trabajaremos son las siguientes:
+  
 C = Pivot,
 PG = Base,
 SF = Alero,
 SG = Escolta,
 PF = Ala-Pivot.
 
-#3.Analisis Exploratorio 
+  El sitio de donde se extrajeron los datos es:
+https://www.kaggle.com/datasets/drgilermo/nba-players-stats/data
 
-```{r}
+ Definiciones:
+ 
+ -WS (Win Shares) : Su traducción al español seria "aporte de victorias al equipo en una temporada" es una métrica avanzada de basquetbol. Su función es estimar cuántas victorias aporta un jugador específico al éxito de su equipo a lo largo de una temporada.
+ 
+ -TS% (Porcentaje de Tiro Verdadero) : mide la eficiencia de un jugador al lanzar. Considerando tiros de campo, triples y tiros libres. Se calcula como:
+ 
+ puntos/2*(intentos de tiro de campo + 0.44(intento de tiros libres))
+
+-PER : La definición se encuentra en la parte 3.d.
+
+# 3.Analisis Exploratorio 
+
+```{r, warning=FALSE, message=FALSE}
 library(ggplot2)
 library(dplyr)
 library(tidyverse)
@@ -26,10 +44,11 @@ df <- read_csv("nba_stats.csv")
 ```
 
 
-## 1. Evolución del triple
+## a. Evolución del triple
 
-En esta sección nos interesó estudiar como ha evolucionado el triple a lo largo de los años. Nosotros creíamos de antemano que los triples intentaodos por partido de cada jugador iban a aumentar, lo cual a la hora de mirar el gráfico resultó ser cierto.
-Buscando iun poco mas de información descubrimos que la línea del tiro de 3, tuvo una modificación (de 7,24 metros toda la línea a llegar a ser 6,70 metros) la cual afectó considerrablemente los intentos del tiro (se puede ver facilmente en el gráfico como repercutió el cambio en los intentos) . Ademas, a lo largo de los años manera de jugar ha cambiado, el tiro de tres toma un rol mucho mas importante. Lo cual puede verse en el gráfico en el 2014 en adelante.
+  En esta sección nos interesó estudiar como ha evolucionado el triple a lo largo de los años. Nosotros creíamos de antemano que los triples intentaodos por partido de cada jugador iban a aumentar, lo cual a la hora de mirar el gráfico resultó ser cierto.
+
+  Buscando iun poco mas de información descubrimos que la línea del tiro de 3, tuvo una modificación (de 7,24 metros toda la línea a llegar a ser 6,70 metros) la cual afectó considerrablemente los intentos del tiro (se puede ver facilmente en el gráfico como repercutió el cambio en los intentos) . Ademas, a lo largo de los años manera de jugar ha cambiado, el tiro de tres toma un rol mucho mas importante. Lo cual puede verse en el gráfico en el 2014 en adelante.
 
 ```{r}
 df_filtrado1 <- df |> 
@@ -47,9 +66,9 @@ evolucion_triple |> ggplot(aes(x = Year, y = prom_3PA)) +
   theme_minimal()
 ```
 
-## 2. Cantidad de Asistencias por temporada
+## b. Cantidad de Asistencias por temporada
 
-En este boxplot visualizamos los cuartiles de asistencias por temporada y por posición. En este caso varios jugadores tenían varias posiciones y le pedimos ayuda a la IA para crear un nuevo df el cual contenga solo las 5 pociones clásicas del deporte, PG (point guard) = Base, SG (shooting guard) = Escolta, SF (small forward) = Alero, PF (power forward), C (center) = Pivot. Ocurre algo muy esperable y es que los bases promedian 4 veces más asistencias que el resto de las posiciones.
+  En este boxplot visualizamos los cuartiles de asistencias por temporada y por posición. En este caso varios jugadores tenían varias posiciones y le pedimos ayuda a la IA para crear un nuevo df el cual contenga solo las 5 pociones clásicas del deporte, PG, SG, SF, PF, C. Ocurre algo esperable y es que los bases promedian 4 veces más asistencias que el resto de las posiciones.
 
 ```{r}
 df_filtrado2 <- df_filtrado1 |> 
@@ -62,8 +81,10 @@ df_filtrado2 |>
         theme_minimal()
 ```
 
-## 3. Comparación de edades prueba cambio 
-En esta parte del analisis exploratorio, nos centramos en la parte de comparar edades con PER que es una estadistica que puntua la productividad de un jugador de basquetbol tomando en cuenta minutos jugados, intensidad de juego, acciones positivas y negativas. Es interesante ver en que edades se alcanzan los picos o los menores rendimientos.
+## c. Comparación de edades prueba cambio
+
+  En esta parte del analisis exploratorio, nos centramos en la parte de comparar edades con PER que es una estadistica que puntua la productividad de un jugador de basquetbol tomando en cuenta minutos jugados, intensidad de juego, acciones positivas y negativas. Es interesante ver en que edades se alcanzan los picos o los menores rendimientos.
+  
 ```{r}
 curva_edad <- df_filtrado1 |>
     group_by(Age) |> 
@@ -77,10 +98,11 @@ curva_edad |>
         theme_minimal()
 ```
 
-## 4. Eficiencia vs Volumen de tiros.
-En este "geom_point" se grafica el porcentaje de aciertos de cada jugador en relacion a la cantidad de tiros que realizan por temporada, uno pensaria que cuanto mas tiran, menos eficaces son los jugadores, pero es exactamente al reves, la relacion nos muestra que cuanto mas puntos por partido realizan, mayor es el porcentaje de acierto.
+## d. Eficiencia vs Volumen de tiros.
 
-```{r}
+  En este "geom_point" se grafica el porcentaje de aciertos de cada jugador en relacion a la cantidad de tiros que realizan por temporada, uno pensaria que cuanto mas tiran, menos eficaces son los jugadores, pero es exactamente al reves, la relacion nos muestra que cuanto mas puntos por partido realizan, mayor es el porcentaje de acierto.
+
+```{r, warning=FALSE, message=FALSE}
 df_filtrado <- df_filtrado1 |> 
             mutate(PTS_pg = PTS / G)
 
@@ -93,3 +115,18 @@ df_filtrado |>
   theme_minimal()
 ```
 
+## 4. Conclusión:
+
+  Luego de analizar y "jugar" con la aplicación de Shiny llegamos a deducir que:
+
+.La modificación de la distancia de la línea de tres en 1995, influyó significativamente en los intentos de triples por jugador.
+
+.Las asistencias por jugador, han disminuido desde 1990 hasta 2017, en más de un 16%. 
+
+.Los jugadores que más puntos hacen por partido son los aleros (SF), seguidos de los escoltas (SG).
+
+.Los base (PG), es la posición con más asistencias promedio.
+
+.Los pivots (C), son los que más bloqueos realizan con diferencia.
+
+. Los jugadores que lideran los top 10 en Win Shares y el resto de métricas personales, también son los más famosos o con mayor exposición, asimismo son los que han ganado más premios individuales.
