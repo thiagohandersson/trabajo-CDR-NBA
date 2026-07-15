@@ -8,7 +8,7 @@ df <- read.csv("nba_stats.csv")
 
 df_filtrado <- df |> 
   filter(MP >= 500) |>                                     
-    Pos_simple = sapply(strsplit(Pos, "-"), function(x) x[1],  # Pasamos los jugadores que tienen varias posiciones a solo 1
+    mutate(Pos_simple = sapply(strsplit(Pos, "-"), function(x) x[1]),  # Pasamos los jugadores que tienen varias posiciones a solo 1
     PTS_pp = PTS / G,
     AST_pp = AST / G,
     TRB_pp = TRB / G,
@@ -16,19 +16,18 @@ df_filtrado <- df |>
     BLK_pp = BLK / G,
     X3PA_pp = X3PA / G)
 
-variables_disponibles <- c("Puntos por partido"      = "PTS_pg",
-                           "Asistencias por partido" = "AST_pg",
-                           "Rebotes por partido"     = "TRB_pg",
-                           "Robos por partido"       = "STL_pg",
-                           "Bloqueos por partido"    = "BLK_pg",
-                           "Triples intentados/partido" = "X3PA_pg",
+variables_disponibles <- c("Puntos por partido"      = "PTS_pp",
+                           "Asistencias por partido" = "AST_pp",
+                           "Rebotes por partido"     = "TRB_pp",
+                           "Robos por partido"       = "STL_pp",
+                           "Bloqueos por partido"    = "BLK_pp",
+                           "Triples intentados/partido" = "X3PA_pp",
                            "Eficiencia de tiro (TS%)"   = "TS.",
                            "PER"                     = "PER",
                            "Win Shares(WS)"= "WS")
 
 jugadores <- sort(unique(df_filtrado$Player))
 lista_posiciones <- sort(unique(df_filtrado$Pos_simple))
-
 
 ui <- fluidPage(
   titlePanel("Datos NBA (1990-2017)"),
@@ -80,18 +79,30 @@ ui <- fluidPage(
                  DTOutput("tabla_comparacion")
                )
              )
-    )
+    ),
+    tabPanel("Top jugadores por metrica", # pestaña 4
+             sidebarLayout(
+               sidebarPanel(
+                 selectizeInput("metricatop", "Metrica de Jugadores",
+                 choices = variables_disponibles)
+               ),
+               mainPanel(
+                 plotOutput("grafico_metricatop"),
+               )
+             ))
   )
-)
+ )
+
 
 server <- function(input, output) {
+  
   
   #Reactive de la pestaña 1
   datos_evolucion <- reactive({
     df_filtrado |> 
       filter(Year >= input$rango_anios[1], Year <= input$rango_anios[2]) |> 
       group_by(Year) |> 
-      summarise(promedio = mean(.data[[input$var_evolucion]], na.rm = TRUE))
+      summarise(promedio = mean(.data[[input$var_evolucion]]))
   })
   
   output$grafico_evolucion <- renderPlot({
@@ -125,12 +136,12 @@ server <- function(input, output) {
       filter(Player %in% c(input$jugador1, input$jugador2)) %>%
       group_by(Player)  |> 
       summarise(
-        `Puntos/partido`      = round(mean(PTS_pg), 1),
-        `Asistencias/partido` = round(mean(AST_pg), 1),
-        `Rebotes/partido`     = round(mean(TRB_pg), 1),
-        `Robos/partido`       = round(mean(STL_pg), 1),
-        `Bloqueos/partido`    = round(mean(BLK_pg), 1),
-        `TS%`                 = round(mean(TS), 3),
+        `Puntos/partido`      = round(mean(PTS_pp), 1),
+        `Asistencias/partido` = round(mean(AST_pp), 1),
+        `Rebotes/partido`     = round(mean(TRB_pp), 1),
+        `Robos/partido`       = round(mean(STL_pp), 1),
+        `Bloqueos/partido`    = round(mean(BLK_pp), 1),
+        `TS.`                 = round(mean(TS.), 3),
         `Temporadas en la base` = n()
       )
   })
@@ -150,7 +161,25 @@ server <- function(input, output) {
   
   output$tabla_comparacion <- renderDT({
     comparacion_jugadores()
+  }, options = list(dom = 't'))
+  # reactive pestaña4
+  
+  metrica_top <- reactive({
+    req(input$metricatop)
+    df_filtrado |> 
+      group_by(Player) |> 
+      summarise(promediotop = mean(.data[[input$metricatop]])) |> 
+      arrange(desc(promediotop)) |> 
+      slice_head(n = 10) |> 
+      mutate(Player = factor(Player, levels = Player)) 
   })
+  output$grafico_metricatop <- renderPlot(
+    ggplot(metrica_top(), aes(x = Player, y = promediotop, fill = Player)) + 
+             geom_col()+ 
+             theme_minimal()+
+             labs(x = "Jugador", y = "Promedio de Metrica", title = "Top 10 jugadores por métrica")
+  )
+  
 }
 shinyApp(ui, server)
   
