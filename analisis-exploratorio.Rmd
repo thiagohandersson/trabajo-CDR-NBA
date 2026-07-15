@@ -5,11 +5,16 @@ date: "2026-07-13"
 ---
 
 #1.Introducción:
-En este trabajo buscamos visualizar y analizar datos de jugadores de la NBA desde 1990 hasta hasta 2017 y buscar que ha cambiado en el tiempo, asi como comparar jugadores dependiendo de sus caracteristicas etc. 
+En este trabajo buscamos visualizar y analizar datos de jugadores de la NBA desde 1990 hasta hasta 2017 y buscar que ha cambiado en el tiempo, asi como comparar jugadores dependiendo de sus caracteristicas. 
 
 #2.Datos:
-Los datos fueron extraidos de un dataset de kaggle. El dataset posee 15117 observaciones, ahi uno de los primeros pasos fue que el programa no tome como distintos jugadores al mismo, que jugo mas de una temporada. Para eso se utilizó un sort, ademas se calcularon por jugador los datos por partido (asistencia, puntos, etc) 
-
+Los datos fueron extraidos de un dataset de kaggle. El dataset posee 15117 observaciones, ahi uno de los primeros pasos fue que el programa no tome como distintos jugadores al mismo, que jugo mas de una temporada. Para eso se utilizó un sort, ademas se calcularon por jugador los datos por partido (asistencia, puntos, etc).
+Cabe aclarar que las posiciones con las que trabajaremos son las siguientes:
+C = Pivot,
+PG = Base,
+SF = Alero,
+SG = Escolta,
+PF = Ala-Pivot.
 
 #3.Analisis Exploratorio 
 
