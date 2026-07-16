@@ -175,8 +175,8 @@ server <- function(input, output) {
       mutate(Player = factor(Player, levels = Player)) 
   })
   output$grafico_metricatop <- renderPlot(
-    ggplot(metrica_top(), aes(x = Player, y = promediotop, fill = Player)) + 
-             geom_col()+ 
+    ggplot(metrica_top(), aes(x = Player, y = promediotop)) + 
+             geom_col(color = "black", fill = "yellow")+ 
              theme_minimal()+
              labs(x = "Jugador", y = "Promedio de Metrica", title = "Top 10 jugadores por métrica")
   )
