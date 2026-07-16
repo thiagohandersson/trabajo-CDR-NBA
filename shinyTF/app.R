@@ -3,6 +3,7 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(DT)
+library(tidyr)
 
 df <- read.csv("nba_stats.csv")
 
@@ -150,7 +151,7 @@ server <- function(input, output) {
     datos_largos <- comparacion_jugadores() |> 
       select(Player, `Puntos/partido`, `Asistencias/partido`, `Rebotes/partido`,
              `Robos/partido`, `Bloqueos/partido`) |> 
-      tidyr::pivot_longer(cols = -Player, names_to = "metric", values_to = "mediametric")
+      pivot_longer(cols = -Player, names_to = "metric", values_to = "mediametric")
     
     ggplot(datos_largos, aes(x = metric, y = mediametric, fill = Player)) +
       geom_col(position = "dodge") +
